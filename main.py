@@ -63,9 +63,7 @@ def print_indexed_list(inp_list,indent="",sep=": ",endline="\n",ending="\n"):
         print(f'{indent}{num}{sep}{choice}',end=endline)
     print(f'{ending}',end="")
 
-def field_insert(dict,value):
-    value=value-1
-    key = data_format_novel[value]
+def field_insert(dict,key):
     if key == "Name":
         name = input(f"Enter '{key}': "  )
         dict[key]=name
@@ -81,7 +79,7 @@ def field_insert(dict,value):
         return dict 
     if key == "Notes":
         with tf.NamedTemporaryFile(delete=False, suffix=".txt", mode="w") as f:
-            f.write("Here Are Your Notes!\nEdit Them As You Like And Close When Done (Write Them Under the First Two Lines)\n\n")
+            f.write("Here Are Your Notes!\nEdit Them As You Like Ctrl S And Close When Done (Write Them Under the First Two Lines)\n\n")
             f.write(dict[key]or"")
             temp_path = f.name
         os.system(f'notepad "{temp_path}"')
@@ -96,8 +94,8 @@ def field_insert(dict,value):
         print_indexed_list(time_options,indent=" ")
         time_change = get_int("Enter Num: ",1,2)
         if time_options[time_change-1]=="Manual":
-            time_inp = input("Enter Time (Ex: 2:02:23): ")
             while True:
+                time_inp = input("Enter Time (Ex: 2:02:23): ")
                 try:
                     h,m,s=map(int,time_inp.strip().split(":"))
                 except:
@@ -165,12 +163,12 @@ def field_insert(dict,value):
         print("Choose A Tier, ")
         print_indexed_list(tier_options,indent=" ")
         option = get_int("Enter Num: ",1,len(tier_options))
-        dict[key]=tier_options[option-1]
+        tier=tier_options[option-1]
+        dict[key]=tier[0]
         return dict
 
 def update_novel(novel_name,novel_data,filename):
-        values = [novel_data["Name"], novel_data["Status"], novel_data["Current Chapter"],
-        novel_data["Notes"], novel_data["Time Spent"], novel_data["Tier"]]
+        values = [novel_data[key] for key in data_format_novel]
         updated_line = ",".join(values)
         with open(filename,'r') as file:
             lines=file.readlines()
@@ -199,9 +197,11 @@ def log_prev(filename):
                     novel_found=True
                     print(f"Here is the novel, \n {novel_data}")
                     print("What would you like to change?")
-                    print_indexed_list(novel_data.keys(),endline=", ")
-                    result=get_int("Enter Num: ", 1,len(novel_data.keys()))
-                    novel_data=field_insert(novel_data,result) 
+                    keys = list(novel_data.keys())
+                    print_indexed_list(keys, endline=", ")
+                    choice_num = get_int("Enter Num: ", 1, len(keys))
+                    key = keys[choice_num - 1]
+                    novel_data = field_insert(novel_data, key)
                     break
     if not novel_found:
         print("Novel not found")
@@ -211,8 +211,8 @@ def log_prev(filename):
 def log_new(filename):
     print("Alrighty Fill In the Following")
     novel_data={key: None for key in data_format_novel}
-    for i in range(1,len(data_format_novel)+1):
-        novel_data=field_insert(novel_data,i)
+    for key in data_format_novel:
+        novel_data=field_insert(novel_data,key)
     print(f'Alright here is what you inputted,\n {novel_data}')
     update_novel(novel_data["Name"],novel_data,filename)
 
@@ -234,7 +234,8 @@ def access(filename):
                 novel_name=novel_data.get("Name")
                 if novel_data.get("Name").lower().strip().replace(" ","")== name.strip().lower().replace(" ",""):
                     novel_found=True
-                    print(f"Here is the novel, \n {novel_data}")
+                    return print(f"Here is the novel, \n {novel_data}") 
+    print("Novel not found")
 
 def show(filename):
     print("Here's the List of novels, ")
@@ -255,6 +256,7 @@ def showtiers(filename):
             if line.strip() != "":
                 values = line.strip().split(",")
                 novel_data = dict(zip(data_format_novel, values))
+                print(novel_data)
                 tier_key = novel_data["Tier"] + " Tier"
                 tiered_novels[tier_key].append(novel_data)
     for tier, novels in tiered_novels.items():
@@ -276,7 +278,6 @@ actions = {
 }
 
 def main():
-    global novel_ex
     global file_name
     try:
         with open("NovelTrackerFile.txt",'r') as file:
@@ -285,18 +286,40 @@ def main():
         with open ("NovelTrackerFile.txt",'w') as file:
             print("New File Is Made")
     print("Welcome to your Novel Tracker!")
-    next=choice(start_mes,set_start)
-    if next == "Log":
-        print(log_mes)
-        print_indexed_list(set_log,indent=" ")
-        value = get_int("Enter Num: ",1,len(set_log))
-        actions[value](file_name)
-    if next == "List Novels":
-        actions[3](file_name)
-    if next == "Show Tier List":
-        actions[4](file_name)
-    if next == "Access a Novel's Data":
-        actions[5](file_name)
-        
+    Running=True
+    while Running:
+        Loop = True
+        Loop_2 = True
+        next=choice(start_mes,set_start)
+        if next == "Log":
+            print(log_mes)
+            print_indexed_list(set_log,indent=" ")
+            value = get_int("Enter Num: ",1,len(set_log))
+            actions[value](file_name)
+        elif next == "List Novels":
+            actions[3](file_name)
+        elif next == "Show Tier List":
+            actions[4](file_name)
+        elif next == "Access a Novel's Data":
+            actions[5](file_name)
+        while Loop:
+            loop_inp=input("Would You Like to Continue[Y/N]?: ")
+            if loop_inp.strip().lower()=="y":
+                while Loop_2:
+                    clear_inp=input("\nWould You Like to Clear Console[Y/N]?: ")
+                    if clear_inp.strip().lower()=="y":
+                        os.system("cls")
+                        Loop_2=False
+                    elif clear_inp.strip().lower()=="n":
+                        Loop_2=False
+                    else:
+                        print("Invalid Input Try Again.")
+                break
+            elif loop_inp.strip().lower()=="n":
+                Loop=False
+                print("See You Soon! Exiting...")
+                Running=False
+            else:
+                print("Invalid Input Try Again")
 if __name__ == "__main__":
     main()
