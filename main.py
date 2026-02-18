@@ -4,7 +4,6 @@ Developer: Guru
 Date: 2026-14-11
 Purpose: This app manages your Novel data by persisting data to NovelTrackerFile.
 """
-import tempfile as tf
 import os
 import time 
 
@@ -78,15 +77,15 @@ def field_insert(dict,key):
         dict[key] = f"{chapter:g}"
         return dict 
     if key == "Notes":
-        with tf.NamedTemporaryFile(delete=False, suffix=".txt", mode="w") as f:
-            f.write("Here Are Your Notes!\nEdit Them As You Like Ctrl S And Close When Done (Write Them Under the First Two Lines)\n\n")
-            f.write(dict[key]or"")
-            temp_path = f.name
-        os.system(f'notepad "{temp_path}"')
+        temp_path = "temp_notes.txt"
+        with open(temp_path, "w") as f:
+                f.write("Here Are Your Notes!\nEdit Them As You Like Ctrl S And Close When Done (Write Them Under the First Two Lines)\n\n")
+                f.write(dict[key] or "")
+        os.system(f'notepad "{temp_path}"')    
         with open(temp_path, "r") as f:
-            f.readline()  
-            f.readline()  
-            dict[key] = f.read().strip()
+                f.readline()  
+                f.readline()  
+                dict[key] = f.read().strip()            
         os.remove(temp_path)
         return dict
     if key == "Time Spent":
