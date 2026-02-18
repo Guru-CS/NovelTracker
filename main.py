@@ -6,7 +6,7 @@ Purpose: This app manages your Novel data by persisting data to NovelTrackerFile
 """
 import os
 import time 
-
+# Set the text for options here
 file_name="NovelTrackerFile.txt"
 start_mes = "Here are your options, "
 set_start = ["Log","List Novels","Show Tier List","Access a Novel's Data"]
@@ -18,7 +18,7 @@ data_format_novel = ["Name","Status","Current Chapter","Time Spent","Tier","Note
 tier_options = ["S Tier", "A Tier", "B Tier", "C Tier", "D Tier", "F Tier"]
 status_options = ["Reading", "Stopped", "Novel in Hiatus"]
 time_options = ["Start Stopwatch", "Manual"]
-
+#Usefull functions I made
 def get_int(prompt, min_val=None, max_val=None):
     while True:
         try:
@@ -81,6 +81,7 @@ def field_insert(dict,key):
         with open(temp_path, "w") as f:
                 f.write("Here Are Your Notes!\nEdit Them As You Like Ctrl S And Close When Done (Write Them Under the First Two Lines)\n\n")
                 f.write(dict[key] or "")
+            #opens up notepad and reads it once you save it and close it
         os.system(f'notepad "{temp_path}"')    
         with open(temp_path, "r") as f:
                 f.readline()  
@@ -167,6 +168,7 @@ def field_insert(dict,key):
         return dict
 
 def update_novel(novel_name,novel_data,filename):
+    #makes new dictionary placeholder with same keys
         values = [novel_data[key] for key in data_format_novel]
         updated_line = ",".join(values)
         with open(filename,'r') as file:
